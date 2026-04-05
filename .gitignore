@@ -1,8 +1,23 @@
-venv/
+# Python
 __pycache__/
 *.pyc
 *.pyo
-*.pyd
-.env
+
+# Virtual Environment
+venv/
+env/
+
+# System files
 .DS_Store
-.ipynb_checkpoints/
+
+# VS Code
+.vscode/
+
+# Data files (IMPORTANT)
+*.npy
+
+# Models
+*.pkl
+
+# Uploaded resumes (optional)
+roles/*/resumes/*
