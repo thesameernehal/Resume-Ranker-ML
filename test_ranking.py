@@ -7,10 +7,10 @@ data analysis, and web development. Experience with Flask is a plus.
 """
 
 # Role selection
-role = "information_technology"
+role = "chef"
 
 # Run ranking
-results = rank_resumes(job_description, role, top_n=5)
+results = rank_resumes(job_description, role, top_n=5, threshold=0.05)
 
 # Print results
 print("\nTop Ranked Resumes:\n")
