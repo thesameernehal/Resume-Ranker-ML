@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Resume Ranking System</title>
+</head>
+<body>
+
+    <h2>Resume Ranking System</h2>
+
+    <form method="POST">
+
+        <label>Select Role:</label>
+        <select name="role" required>
+            <option value="">--Select--</option>
+            <option value="accountant">Accountant</option>
+            <option value="chef">Chef</option>
+            <option value="information_technology">IT</option>
+        </select>
+
+        <br><br>
+
+        <label>Enter Job Description:</label><br>
+        <textarea name="job_description" rows="6" cols="50" required></textarea>
+
+        <br><br>
+
+        <button type="submit">Rank Resumes</button>
+    </form>
+
+    <hr>
+
+    <h3>Top Ranked Resumes</h3>
+
+    {% if results %}
+        <ul>
+            {% for r in results %}
+                <li><strong>{{ r.resume }}</strong> → Score: {{ r.score }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No results yet.</p>
+    {% endif %}
+
+</body>
+</html>
