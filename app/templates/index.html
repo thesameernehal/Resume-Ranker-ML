@@ -160,9 +160,10 @@
         <!-- FORM -->
 
         <div class="card">
-            <form method="POST" onsubmit="document.getElementById('loader').style.display='block'">
+            <form method="POST" enctype="multipart/form-data"
+                onsubmit="document.getElementById('loader').style.display='block'">
 
-                
+
                 <div class="row">
                     <div>
                         <label>Role</label>
@@ -186,15 +187,18 @@
                     <textarea name="job_description">{{ jd }}</textarea>
                 </div>
 
+                <div style="margin-top:15px;">
+                    <label>Upload Resumes (Optional)</label>
+                    <input type="file" name="resumes" multiple>
+                </div>
+
                 <div class="actions">
                     <button class="btn btn-primary">Rank Resumes</button>
                     <a href="/report" class="btn-ghost" target="_blank">View Report</a>
                 </div>
 
                 <div id="loader" class="loader">Processing resumes...</div>
-
             </form>
-            
 
         </div>
 
@@ -203,11 +207,9 @@
         {% if results %}
 
         <div style="margin-top:30px;">
-
-            
             <h2>Top Results</h2>
 
-            {% for file, score in results %}
+            {% for file, score, source in results %}
             <div class="resume-card">
 
                 <div>
@@ -217,20 +219,22 @@
                         <!-- <div class="score-fill" style="width: {{ (score|float * 100)|round(1) }}%"></div> -->
                     </div>
 
-                    <div style="font-size:12px;">Score: {{ "%.3f"|format(score|float) }}</div>
+                    <div style="font-size:12px;">
+                        Score: {{ "%.3f"|format(score|float) }}
+                    </div>
                 </div>
 
-                <a href="/view/{{ file }}?role={{ role }}" target="_blank" class="view-link">
+                <a href="/view/{{ file }}?role={{ role }}&source={{ source }}" target="_blank" class="view-link">
                     View →
                 </a>
 
             </div>
             {% endfor %}
-    
 
         </div>
 
-        {% elif results is not none %} <p>No results found</p>
+        {% elif results is not none %}
+        <p>No results found</p>
         {% endif %}
 
     </div>

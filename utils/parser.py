@@ -20,19 +20,18 @@ def read_docx(file_path):
 
 
 def read_txt(file_path):
-    with open(file_path, "r", encoding="utf-8") as f:
+    with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
         return f.read()
 
 
 def clean_text(text):
-    text = text.replace("\n", " ")  
-    text = text.lower()           
+    text = text.replace("\n", " ")
+    text = text.lower()
     return text
 
 
-# Main function 
-def extract_text(file_path):
-    ext = os.path.splitext(file_path)[1]
+def extract_text_from_file(file_path):
+    ext = os.path.splitext(file_path)[1].lower()
 
     if ext == ".pdf":
         text = read_pdf(file_path)
@@ -44,3 +43,5 @@ def extract_text(file_path):
         return ""
 
     return clean_text(text)
+
+extract_text = extract_text_from_file

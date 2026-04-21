@@ -21,3 +21,6 @@ env/
 
 # Uploaded resumes (optional)
 roles/*/resumes/*
+
+# Data files for manual uploads
+data/
