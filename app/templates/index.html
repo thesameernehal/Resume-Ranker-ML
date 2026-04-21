@@ -3,242 +3,237 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Resume Ranker</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet" />
 
     <style>
+        :root {
+            --bg: #0e1116;
+            --panel: #1a2030;
+            --border: #2a3346;
+            --text: #e6e9f2;
+            --muted: #8b94aa;
+            --grad: linear-gradient(135deg, #7cf5c4, #6aa6ff);
+        }
+
         body {
-            font-family: 'Poppins', sans-serif;
-            background: #0f172a;
-            color: #e2e8f0;
+            font-family: 'Space Grotesk';
+            background: var(--bg);
+            color: var(--text);
             margin: 0;
         }
 
         .container {
-            width: 65%;
-            margin: 40px auto;
+            max-width: 1000px;
+            margin: auto;
+            padding: 40px;
         }
 
         h1 {
-            text-align: center;
-            color: #38bdf8;
-            margin-bottom: 5px;
+            font-size: 40px;
+            margin-bottom: 10px;
         }
 
-        .subtitle {
-            text-align: center;
-            color: #94a3b8;
-            margin-bottom: 25px;
+        .accent {
+            background: var(--grad);
+            -webkit-background-clip: text;
+            color: transparent;
         }
 
-        form {
-            background: #1e293b;
+        .card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 16px;
             padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
         }
 
         label {
-            margin-top: 10px;
-            display: block;
+            font-size: 13px;
+            color: var(--muted);
         }
 
         select,
         textarea,
         input {
             width: 100%;
-            padding: 10px;
-            margin-top: 8px;
-            border-radius: 8px;
-            border: none;
-            background: #334155;
+            padding: 12px;
+            margin-top: 6px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: #0e1116;
             color: white;
         }
 
         textarea {
-            height: 120px;
-            resize: none;
+            min-height: 120px;
         }
 
-        button {
-            width: 100%;
-            margin-top: 20px;
-            padding: 12px;
-            background: #38bdf8;
+        .row {
+            display: flex;
+            gap: 15px;
+        }
+
+        .row>div {
+            flex: 1;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border-radius: 10px;
             border: none;
-            border-radius: 8px;
-            font-weight: bold;
             cursor: pointer;
+            font-weight: bold;
         }
 
-        button:hover {
-            background: #0ea5e9;
+        .btn-primary {
+            background: var(--grad);
+            color: black;
+        }
+
+        .btn-ghost {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: white;
+            text-decoration: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+        }
+
+        .actions {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .resume-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--panel);
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            margin-top: 12px;
+        }
+
+        .rank {
+            font-weight: bold;
+        }
+
+        .score-bar {
+            height: 6px;
+            background: #111;
+            border-radius: 5px;
+            margin-top: 6px;
+            overflow: hidden;
+        }
+
+        .score-fill {
+            height: 100%;
+            background: var(--grad);
+        }
+
+        .view-link {
+            color: #6aa6ff;
+            text-decoration: none;
         }
 
         .loader {
             display: none;
-            text-align: center;
-            margin-top: 15px;
-            color: #facc15;
-        }
-
-        .results {
-            margin-top: 35px;
-        }
-
-        .results h2 {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .card {
-            background: #1e293b;
-            padding: 20px;
-            margin-bottom: 20px;
-            border-radius: 12px;
-            border-left: 6px solid #38bdf8;
-            transition: 0.2s;
-        }
-
-        .card:hover {
-            transform: scale(1.02);
-        }
-
-        .top-card {
-            border-left: 6px solid #22c55e;
-        }
-
-        .rank {
-            color: #facc15;
-            font-weight: bold;
-        }
-
-        .file {
-            color: #cbd5f5;
-        }
-
-        .score {
-            color: #22c55e;
-            font-weight: bold;
-        }
-
-        .progress-bar {
-            margin-top: 8px;
-            height: 8px;
-            background: #334155;
-            border-radius: 5px;
-            overflow: hidden;
-        }
-
-        .progress {
-            height: 100%;
-            background: #22c55e;
-        }
-
-        .view-btn {
             margin-top: 10px;
-            display: inline-block;
-            padding: 8px 12px;
-            background: #22c55e;
-            color: black;
-            border-radius: 6px;
-            text-decoration: none;
-            font-size: 14px;
-        }
-
-        .view-btn:hover {
-            background: #16a34a;
-        }
-
-        .no-results {
-            text-align: center;
-            color: #f87171;
+            color: var(--muted);
         }
     </style>
-
-    <script>
-        function showLoader() {
-            document.getElementById("loader").style.display = "block";
-        }
-    </script>
 
 </head>
 
 <body>
-
     <div class="container">
 
-        <h1>Resume Ranking System</h1>
-        <p class="subtitle">Machine Learning based Resume Screening</p>
+        <h1>Resume <span class="accent">Ranker</span></h1>
 
-        <form method="POST" onsubmit="showLoader()">
+        <!-- FORM -->
 
-            <label>Select Role:</label>
-            <select name="role" required>
-                <option value="accountant" {% if role=="accountant" %}selected{% endif %}>Accountant</option>
-                <option value="chef" {% if role=="chef" %}selected{% endif %}>Chef</option>
-                <option value="information_technology" {% if role=="information_technology" %}selected{% endif %}>
-                    Information Technology</option>
-            </select>
+        <div class="card">
+            <form method="POST" onsubmit="document.getElementById('loader').style.display='block'">
 
-            <label>Job Description:</label>
-            <textarea name="job_description" required>{{ jd }}</textarea>
+                
+                <div class="row">
+                    <div>
+                        <label>Role</label>
+                        <select name="role">
+                            <option value="accountant" {% if role=="accountant" %}selected{% endif %}>Accountant
+                            </option>
+                            <option value="chef" {% if role=="chef" %}selected{% endif %}>Chef</option>
+                            <option value="information_technology" {% if role=="information_technology" %}selected{%
+                                endif %}>Information Technology</option>
+                        </select>
+                    </div>
 
-            <label>Top N:</label>
-            <input type="number" name="top_n" value="5" min="1" max="20">
-
-            <button type="submit">Rank Resumes</button>
-            <a href="/report" target="_blank" style="
-display:block;
-text-align:center;
-margin-top:15px;
-color:#38bdf8;
-text-decoration:none;
-font-weight:bold;">
-                View ML Comparison Report
-            </a>
-        </form>
-
-        <div id="loader" class="loader">
-            ⏳ Processing resumes...
-        </div>
-
-        {% if results %}
-        <div class="results">
-            <h2>Top Ranked Resumes</h2>
-
-            {% for file, score in results %}
-            <div class="card {% if loop.index == 1 %}top-card{% endif %}">
-
-                <p class="rank">Rank {{ loop.index }}</p>
-
-                <p class="file"><strong>File:</strong> {{ file }}</p>
-
-                <p class="score">Score: {{ "%.3f"|format(score|float) }}</p>
-
-                <!-- Progress Bar -->
-                <div class="progress-bar">
-                    <!-- <div class="progress" style="width: {{ (score * 100)|round(2) }}%;"></div> -->
+                    <div>
+                        <label>Top N</label>
+                        <input type="number" name="top_n" value="5">
+                    </div>
                 </div>
 
-                <a class="view-btn" href="/view/{{ file }}?role={{ role }}" target="_blank">
-                    View Resume
+                <div style="margin-top:15px;">
+                    <label>Job Description</label>
+                    <textarea name="job_description">{{ jd }}</textarea>
+                </div>
+
+                <div class="actions">
+                    <button class="btn btn-primary">Rank Resumes</button>
+                    <a href="/report" class="btn-ghost" target="_blank">View Report</a>
+                </div>
+
+                <div id="loader" class="loader">Processing resumes...</div>
+
+            </form>
+            
+
+        </div>
+
+        <!-- RESULTS -->
+
+        {% if results %}
+
+        <div style="margin-top:30px;">
+
+            
+            <h2>Top Results</h2>
+
+            {% for file, score in results %}
+            <div class="resume-card">
+
+                <div>
+                    <div class="rank">#{{ loop.index }} - {{ file }}</div>
+
+                    <div class="score-bar">
+                        <!-- <div class="score-fill" style="width: {{ (score|float * 100)|round(1) }}%"></div> -->
+                    </div>
+
+                    <div style="font-size:12px;">Score: {{ "%.3f"|format(score|float) }}</div>
+                </div>
+
+                <a href="/view/{{ file }}?role={{ role }}" target="_blank" class="view-link">
+                    View →
                 </a>
 
             </div>
             {% endfor %}
+    
 
         </div>
 
-        {% elif results is not none %}
-        <p class="no-results">No matching resumes found.</p>
+        {% elif results is not none %} <p>No results found</p>
         {% endif %}
 
-
     </div>
-
 </body>
 
 </html>
