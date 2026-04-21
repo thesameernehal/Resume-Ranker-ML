@@ -1,93 +1,93 @@
 <!DOCTYPE html>
-
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Model Comparison Report</title>
 
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600&family=JetBrains+Mono&display=swap"
+        rel="stylesheet">
 
-<style>
-    body {
-        font-family: Arial;
-        background: #0f172a;
-        color: white;
-        padding: 20px;
-    }
+    <style>
+        :root {
+            --bg: #1e1e2f;
+            --panel: #2a2a3d;
+            --border: #3a3a55;
+            --text: #f1f1f1;
+            --muted: #b0b0c3;
+        }
 
-    h1 {
-        text-align: center;
-        color: #38bdf8;
-    }
+        body {
+            font-family: 'Space Grotesk';
+            background: var(--bg);
+            color: var(--text);
+            padding: 40px;
+            font-size: 16px;
+        }
 
-    table {
-        width: 90%;
-        margin: 20px auto;
-        border-collapse: collapse;
-        background: #1e293b;
-    }
+        h1 {
+            font-size: 36px;
+        }
 
-    th, td {
-        padding: 10px;
-        text-align: center;
-        border: 1px solid #334155;
-    }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: var(--panel);
+        }
 
-    th {
-        background: #38bdf8;
-        color: black;
-    }
+        th,
+        td {
+            border: 1px solid var(--border);
+            padding: 12px;
+            text-align: center;
+            font-size: 15px;
+        }
 
-    tr:hover {
-        background: #334155;
-    }
+        th {
+            background: #23233a;
+        }
 
-    .role-title {
-        text-align: center;
-        margin-top: 40px;
-        color: #22c55e;
-    }
-</style>
+        tr:hover {
+            background: #2f2f48;
+        }
 
-
+        .role-title {
+            margin-top: 40px;
+            font-size: 22px;
+        }
+    </style>
 </head>
+
 <body>
 
-<h1>Model Comparison Report</h1>
+    <h1>Model Comparison Report</h1>
 
-{% for role, models in data.items() %}
+    {% for role, models in data.items() %}
+    <div class="role-title">{{ role | upper }}</div>
 
-<h2 class="role-title">{{ role | upper }}</h2>
+    <table>
+        <tr>
+            <th>Model</th>
+            <th>Accuracy</th>
+            <th>Precision</th>
+            <th>Recall</th>
+            <th>F1 Score</th>
+        </tr>
 
-<table>
-    <tr>
-        <th>Model</th>
-        <th>Accuracy</th>
-        <th>Precision</th>
-        <th>Recall</th>
-        <th>F1 Score</th>
-    </tr>
+        {% for model, scores in models.items() %}
+        <tr>
+            <td>{{ model }}</td>
+            <td>{{ "%.3f"|format(scores.accuracy) }}</td>
+            <td>{{ "%.3f"|format(scores.precision) }}</td>
+            <td>{{ "%.3f"|format(scores.recall) }}</td>
+            <td>{{ "%.3f"|format(scores.f1) }}</td>
+        </tr>
+        {% endfor %}
 
-
-{% for model, scores in models.items() %}
-<tr>
-    <td>{{ model }}</td>
-
-    {% if scores == "Model not found" %}
-        <td colspan="4">Model not found</td>
-    {% else %}
-        <td>{{ scores.accuracy }}</td>
-        <td>{{ scores.precision }}</td>
-        <td>{{ scores.recall }}</td>
-        <td>{{ scores.f1 }}</td>
-    {% endif %}
-
-</tr>
-{% endfor %}
-
-
-</table>
-
-{% endfor %}
+    </table>
+    {% endfor %}
 
 </body>
+
 </html>

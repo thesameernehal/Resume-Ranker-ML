@@ -2,7 +2,9 @@ from flask import Flask, render_template, request, send_file
 from utils.ranker import rank_resumes
 from utils.compare_models import get_full_comparison
 from utils.rank_uploaded import rank_uploaded_resumes
+
 import os
+import shutil
 
 app = Flask(__name__)
 
@@ -13,57 +15,68 @@ def home():
     results = []
     selected_role = ""
     jd_text = ""
+    source_type = None
 
     if request.method == "POST":
         selected_role = request.form.get("role")
         jd_text = request.form.get("job_description")
         uploaded_files = request.files.getlist("resumes")
 
-        # Filter valid files
+        # ✅ FIXED top_n bug (empty input safe)
+        try:
+            top_n = int(request.form.get("top_n") or 5)
+        except:
+            top_n = 5
+
+        # Keep only valid files
         uploaded_files = [f for f in uploaded_files if f and f.filename.strip() != ""]
+
+        # Base directory
+        base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
         if jd_text:
 
-            # CASE 1: Uploaded resumes
+            # ✅ CASE 1: Uploaded resumes
             if len(uploaded_files) > 0:
                 print("Using uploaded resumes...")
+                source_type = "upload"
 
-                os.makedirs("data", exist_ok=True)
+                upload_folder = os.path.join(base_dir, "data")
+
+                # Clear old uploads
+                if os.path.exists(upload_folder):
+                    shutil.rmtree(upload_folder)
+
+                os.makedirs(upload_folder, exist_ok=True)
+
                 saved_paths = []
 
                 for file in uploaded_files:
-                    path = os.path.join("data", file.filename)
-                    file.save(path)
-                    saved_paths.append(path)
+                    filepath = os.path.join(upload_folder, file.filename)
+                    file.save(filepath)
+                    saved_paths.append(filepath)
 
-                raw_results = rank_uploaded_resumes(saved_paths, jd_text, top_n=5)
+                # ✅ Pass correct data (paths)
+                results = rank_uploaded_resumes(saved_paths, jd_text, top_n=top_n)
 
-                # Convert to (file, score, source)
-                results = [
-                    (os.path.basename(path), score, "upload")
-                    for path, score in raw_results
-                ]
-
-            # CASE 2: Dataset resumes
+            # ✅ CASE 2: Dataset resumes
             elif selected_role:
                 print("Using dataset resumes...")
+                source_type = "dataset"
 
-                raw_results = rank_resumes(jd_text, selected_role, top_n=5)
-
-                results = [
-                    (item["resume"], item["score"], "dataset")
-                    for item in raw_results
-                ]
+                raw_results = rank_resumes(jd_text, selected_role, top_n=top_n)
+                results = [(item["resume"], item["score"]) for item in raw_results]
 
     return render_template(
         "index.html",
         results=results,
         role=selected_role,
-        jd=jd_text
+        jd=jd_text,
+        source_type=source_type
     )
 
 
-# View Resume Route
+# ✅ View Resume Route
 @app.route("/view/<filename>")
 def view_file(filename):
     role = request.args.get("role")
@@ -76,9 +89,13 @@ def view_file(filename):
     else:
         path = os.path.join(base_dir, "roles", role, "resumes", filename)
 
+    if not os.path.exists(path):
+        return "File not found", 404
+
     return send_file(path)
 
-# Report Route
+
+# ✅ Compare Models Route
 @app.route("/report")
 def report():
     data = get_full_comparison()

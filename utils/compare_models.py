@@ -57,7 +57,7 @@ def compare_models_for_role(role):
     return role_results
 
 
-# NEW FUNCTION (IMPORTANT)
+# full comparsion
 def get_full_comparison():
 
     roles = ["accountant", "chef", "information_technology"]
