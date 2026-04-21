@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, send_from_directory
 from utils.ranker import rank_resumes
+from utils.compare_models import get_full_comparison
 import os
 
 app = Flask(__name__)
@@ -42,6 +43,12 @@ def view_file(filename):
     folder = os.path.join(project_root, "roles", role, "resumes")
 
     return send_from_directory(folder, filename)
+
+# Compare Models Route
+@app.route("/report")
+def report():
+    data = get_full_comparison()
+    return render_template("report.html", data=data)
 
 if __name__ == "__main__":
     app.run(debug=True)

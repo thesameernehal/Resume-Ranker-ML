@@ -2,7 +2,6 @@ import os
 import pickle
 
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
-
 from utils.prepare_dataset import load_resumes_for_role
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
@@ -12,29 +11,25 @@ def evaluate_model(model, X_test, y_test):
     y_pred = model.predict(X_test)
 
     return {
-        "accuracy": accuracy_score(y_test, y_pred),
-        "precision": precision_score(y_test, y_pred),
-        "recall": recall_score(y_test, y_pred),
-        "f1": f1_score(y_test, y_pred)
+        "accuracy": round(accuracy_score(y_test, y_pred), 4),
+        "precision": round(precision_score(y_test, y_pred), 4),
+        "recall": round(recall_score(y_test, y_pred), 4),
+        "f1": round(f1_score(y_test, y_pred), 4)
     }
 
 
 def compare_models_for_role(role):
 
-    # Load dataset
     texts, labels = load_resumes_for_role(role)
 
-    # Use same TF-IDF for fair comparison
     vectorizer = TfidfVectorizer(max_features=5000)
     X = vectorizer.fit_transform(texts)
     y = labels
 
-    # Split
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, random_state=42
     )
 
-    # Load models
     model_dir = f"roles/{role}/models"
 
     models = {
@@ -43,11 +38,13 @@ def compare_models_for_role(role):
         "Random Forest": "rf.pkl"
     }
 
+    role_results = {}
+
     for name, file in models.items():
         path = os.path.join(model_dir, file)
 
         if not os.path.exists(path):
-            print(f"{name}: Model not found!")
+            role_results[name] = "Model not found"
             continue
 
         with open(path, "rb") as f:
@@ -55,23 +52,19 @@ def compare_models_for_role(role):
 
         results = evaluate_model(model, X_test, y_test)
 
-        print(f"\n{name}:")
-        print(f"Accuracy : {results['accuracy']:.4f}")
-        print(f"Precision: {results['precision']:.4f}")
-        print(f"Recall   : {results['recall']:.4f}")
-        print(f"F1-score : {results['f1']:.4f}")
+        role_results[name] = results
+
+    return role_results
 
 
-def run_comparison():
+# NEW FUNCTION (IMPORTANT)
+def get_full_comparison():
+
     roles = ["accountant", "chef", "information_technology"]
 
+    final_results = {}
+
     for role in roles:
-     print("\n" + "="*30)
-     print(f"{role.upper()}")
-     print("="*30)
+        final_results[role] = compare_models_for_role(role)
 
-     compare_models_for_role(role)
-
-
-if __name__ == "__main__":
-    run_comparison()
+    return final_results
