@@ -169,11 +169,9 @@
                     <div>
                         <label>Role</label>
                         <select name="role">
-                            <option value="accountant" {% if role=="accountant" %}selected{% endif %}>Accountant
-                            </option>
+                            <option value="accountant" {% if role=="accountant" %}selected{% endif %}>Accountant</option>
                             <option value="chef" {% if role=="chef" %}selected{% endif %}>Chef</option>
-                            <option value="information_technology" {% if role=="information_technology" %}selected{%
-                                endif %}>IT</option>
+                            <option value="information_technology" {% if role=="information_technology" %}selected{% endif %}>IT</option>
                         </select>
                     </div>
 
@@ -182,14 +180,14 @@
                         <input type="number" name="top_n" min="1">
                     </div>
                 </div>
-                
+
                 <div>
                     <label>Ranking Method</label>
                     <select name="model_type">
-                        <option value="tfidf">TF-IDF (Default)</option>
-                        <option value="nb">Naive Bayes</option>
-                        <option value="lr">Logistic Regression</option>
-                        <option value="rf">Random Forest</option>
+                        <option value="tfidf" {% if model_type=="tfidf" %}selected{% endif %}>TF-IDF (Default)</option>
+                        <option value="nb" {% if model_type=="nb" %}selected{% endif %}>Naive Bayes</option>
+                        <option value="lr" {% if model_type=="lr" %}selected{% endif %}>Logistic Regression</option>
+                        <option value="rf" {% if model_type=="rf" %}selected{% endif %}>Random Forest</option>
                     </select>
                 </div>
 
@@ -221,14 +219,13 @@
                 <div>
                     <div class="rank">#{{ loop.index }} - {{ file }}</div>
 
-                    <div class="score-bar">
-                        <!-- <div class="score-fill" style="width: {{ (score|float * 100)|round(1) }}%"></div> -->
-                    </div>
+                    <div class="score-bar"></div>
 
                     <div style="font-size:13px;">Score: {{ "%.3f"|format(score|float) }}</div>
                 </div>
 
-                <a href="/view/{{ file }}?role={{ role }}&source={{ 'upload' if 'data/' in file else 'dataset' }}"
+                <!-- FIXED SOURCE HANDLING -->
+                <a href="/view/{{ file }}?role={{ role }}&source={{ source_type }}"
                     target="_blank" class="view-link">
                     View →
                 </a>

@@ -60,29 +60,27 @@ def rank_resumes_ml(role, model_type, resumes_folder, top_n=5):
 
 
 # For uploaded resumes
-def rank_uploaded_resumes_ml(file_paths, role, model_type, top_n=5):
+def rank_uploaded_resumes_ml(file_paths, jd_text, role, model_type, top_n=5):
+
+    from utils.parser import extract_text
+    import numpy as np
 
     model, vectorizer = load_model_and_vectorizer(role, model_type)
-
-    if model is None:
-        return []
 
     results = []
 
     for path in file_paths:
-        try:
-            filename = os.path.basename(path)
+        text = extract_text(path)
 
-            text = extract_text(path)
-            X = vectorizer.transform([text])
+        if not text.strip():
+            continue
 
-            prob = model.predict_proba(X)[0]
-            score = prob[1] if len(prob) > 1 else prob[0]
+        X = vectorizer.transform([text])
+        prob = model.predict_proba(X)[0].max()
 
-            results.append((filename, score))
+        filename = path.split("\\")[-1]
+        results.append((filename, prob))
 
-        except Exception as e:
-            print(f"Error processing {path}: {e}")
+    results = sorted(results, key=lambda x: x[1], reverse=True)
 
-    results.sort(key=lambda x: x[1], reverse=True)
     return results[:top_n]

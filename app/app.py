@@ -17,34 +17,36 @@ def home():
     selected_role = ""
     jd_text = ""
     source_type = None
+    model_type = "tfidf"   # default
 
     if request.method == "POST":
+
         selected_role = request.form.get("role")
         jd_text = request.form.get("job_description")
         uploaded_files = request.files.getlist("resumes")
-
-        # Safe top_n handling (fix crash)
-        top_n_value = request.form.get("top_n")
-        top_n = int(top_n_value) if top_n_value and top_n_value.isdigit() else 5
-
-        # Model selection
         model_type = request.form.get("model_type", "tfidf")
 
-        # Keep valid files only
+        # safe top_n
+        try:
+            top_n = int(request.form.get("top_n") or 5)
+        except:
+            top_n = 5
+
+        print("ROLE:", selected_role)
+        print("MODEL:", model_type)
+
         uploaded_files = [f for f in uploaded_files if f and f.filename.strip() != ""]
 
-        # Base directory
         base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
         if jd_text:
 
-            # CASE 1: Uploaded resumes
+            # ================= UPLOADED =================
             if len(uploaded_files) > 0:
                 source_type = "upload"
 
                 upload_folder = os.path.join(base_dir, "data")
 
-                # Clear old uploads
                 if os.path.exists(upload_folder):
                     shutil.rmtree(upload_folder)
 
@@ -57,27 +59,25 @@ def home():
                     file.save(filepath)
                     saved_paths.append(filepath)
 
-                # TF-IDF or ML
+                # MODEL SWITCH
                 if model_type == "tfidf":
-                    results = rank_uploaded_resumes(uploaded_files, jd_text, top_n=top_n)
+                    results = rank_uploaded_resumes(saved_paths, jd_text, top_n=top_n)
                 else:
                     results = rank_uploaded_resumes_ml(
-                        saved_paths, selected_role, model_type, top_n=top_n
+                        saved_paths, jd_text, selected_role, model_type, top_n
                     )
 
-            # CASE 2: Dataset resumes
+            # ================= DATASET =================
             elif selected_role:
                 source_type = "dataset"
 
                 if model_type == "tfidf":
                     raw_results = rank_resumes(jd_text, selected_role, top_n=top_n)
                     results = [(item["resume"], item["score"]) for item in raw_results]
+
                 else:
-                    resumes_folder = os.path.join(
-                        base_dir, "roles", selected_role, "resumes"
-                    )
                     results = rank_resumes_ml(
-                        selected_role, model_type, resumes_folder, top_n=top_n
+                        jd_text, selected_role, model_type, top_n
                     )
 
     return render_template(
@@ -85,13 +85,15 @@ def home():
         results=results,
         role=selected_role,
         jd=jd_text,
-        source_type=source_type
+        source_type=source_type,
+        model_type=model_type
     )
 
 
-# View Resume Route
+# ================= VIEW =================
 @app.route("/view/<filename>")
 def view_file(filename):
+
     role = request.args.get("role")
     source = request.args.get("source")
 
@@ -107,7 +109,8 @@ def view_file(filename):
 
     return send_file(path)
 
-# Compare Models Route
+
+# ================= REPORT =================
 @app.route("/report")
 def report():
     data = get_full_comparison()
