@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, send_file
 from utils.ranker import rank_resumes
 from utils.compare_models import get_full_comparison
 from utils.rank_uploaded import rank_uploaded_resumes
+from utils.ml_ranker import rank_resumes_ml, rank_uploaded_resumes_ml
 
 import os
 import shutil
@@ -22,13 +23,14 @@ def home():
         jd_text = request.form.get("job_description")
         uploaded_files = request.files.getlist("resumes")
 
-        # ✅ FIXED top_n bug (empty input safe)
-        try:
-            top_n = int(request.form.get("top_n") or 5)
-        except:
-            top_n = 5
+        # Safe top_n handling (fix crash)
+        top_n_value = request.form.get("top_n")
+        top_n = int(top_n_value) if top_n_value and top_n_value.isdigit() else 5
 
-        # Keep only valid files
+        # Model selection
+        model_type = request.form.get("model_type", "tfidf")
+
+        # Keep valid files only
         uploaded_files = [f for f in uploaded_files if f and f.filename.strip() != ""]
 
         # Base directory
@@ -36,9 +38,8 @@ def home():
 
         if jd_text:
 
-            # ✅ CASE 1: Uploaded resumes
+            # CASE 1: Uploaded resumes
             if len(uploaded_files) > 0:
-                print("Using uploaded resumes...")
                 source_type = "upload"
 
                 upload_folder = os.path.join(base_dir, "data")
@@ -56,16 +57,28 @@ def home():
                     file.save(filepath)
                     saved_paths.append(filepath)
 
-                # ✅ Pass correct data (paths)
-                results = rank_uploaded_resumes(saved_paths, jd_text, top_n=top_n)
+                # TF-IDF or ML
+                if model_type == "tfidf":
+                    results = rank_uploaded_resumes(uploaded_files, jd_text, top_n=top_n)
+                else:
+                    results = rank_uploaded_resumes_ml(
+                        saved_paths, selected_role, model_type, top_n=top_n
+                    )
 
-            # ✅ CASE 2: Dataset resumes
+            # CASE 2: Dataset resumes
             elif selected_role:
-                print("Using dataset resumes...")
                 source_type = "dataset"
 
-                raw_results = rank_resumes(jd_text, selected_role, top_n=top_n)
-                results = [(item["resume"], item["score"]) for item in raw_results]
+                if model_type == "tfidf":
+                    raw_results = rank_resumes(jd_text, selected_role, top_n=top_n)
+                    results = [(item["resume"], item["score"]) for item in raw_results]
+                else:
+                    resumes_folder = os.path.join(
+                        base_dir, "roles", selected_role, "resumes"
+                    )
+                    results = rank_resumes_ml(
+                        selected_role, model_type, resumes_folder, top_n=top_n
+                    )
 
     return render_template(
         "index.html",
@@ -76,7 +89,7 @@ def home():
     )
 
 
-# ✅ View Resume Route
+# View Resume Route
 @app.route("/view/<filename>")
 def view_file(filename):
     role = request.args.get("role")
@@ -94,8 +107,7 @@ def view_file(filename):
 
     return send_file(path)
 
-
-# ✅ Compare Models Route
+# Compare Models Route
 @app.route("/report")
 def report():
     data = get_full_comparison()
