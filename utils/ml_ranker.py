@@ -30,6 +30,7 @@ def load_model_and_vectorizer(role, model_type):
     return model, vectorizer
 
 
+# For dataset resumes
 def rank_resumes_ml(role, model_type, resumes_folder, top_n=5):
 
     model, vectorizer = load_model_and_vectorizer(role, model_type)
@@ -46,10 +47,7 @@ def rank_resumes_ml(role, model_type, resumes_folder, top_n=5):
             text = extract_text(path)
             X = vectorizer.transform([text])
 
-            # Probability score (important)
             prob = model.predict_proba(X)[0]
-
-            # Take probability of "relevant" class (1)
             score = prob[1] if len(prob) > 1 else prob[0]
 
             results.append((file, score))
@@ -57,7 +55,34 @@ def rank_resumes_ml(role, model_type, resumes_folder, top_n=5):
         except Exception as e:
             print(f"Error processing {file}: {e}")
 
-    # Sort descending
     results.sort(key=lambda x: x[1], reverse=True)
+    return results[:top_n]
 
+
+# For uploaded resumes
+def rank_uploaded_resumes_ml(file_paths, role, model_type, top_n=5):
+
+    model, vectorizer = load_model_and_vectorizer(role, model_type)
+
+    if model is None:
+        return []
+
+    results = []
+
+    for path in file_paths:
+        try:
+            filename = os.path.basename(path)
+
+            text = extract_text(path)
+            X = vectorizer.transform([text])
+
+            prob = model.predict_proba(X)[0]
+            score = prob[1] if len(prob) > 1 else prob[0]
+
+            results.append((filename, score))
+
+        except Exception as e:
+            print(f"Error processing {path}: {e}")
+
+    results.sort(key=lambda x: x[1], reverse=True)
     return results[:top_n]

@@ -182,6 +182,16 @@
                         <input type="number" name="top_n" min="1">
                     </div>
                 </div>
+                
+                <div>
+                    <label>Ranking Method</label>
+                    <select name="model_type">
+                        <option value="tfidf">TF-IDF (Default)</option>
+                        <option value="nb">Naive Bayes</option>
+                        <option value="lr">Logistic Regression</option>
+                        <option value="rf">Random Forest</option>
+                    </select>
+                </div>
 
                 <div style="margin-top:15px;">
                     <label>Job Description</label>
