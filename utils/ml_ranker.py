@@ -1,23 +1,22 @@
 import os
 import pickle
-
 from utils.parser import extract_text
 
 
 def load_model_and_vectorizer(role, model_type):
-    model_dir = os.path.join("roles", role, "models")
+    base_path = os.path.join("roles", role, "models")
 
-    if model_type == "lr":
-        model_path = os.path.join(model_dir, "lr.pkl")
-        vectorizer_path = os.path.join(model_dir, "tfidf_lr.pkl")
+    if model_type == "nb":
+        model_path = os.path.join(base_path, "nb.pkl")
+        vec_path = os.path.join(base_path, "tfidf.pkl")
 
-    elif model_type == "nb":
-        model_path = os.path.join(model_dir, "nb.pkl")
-        vectorizer_path = os.path.join(model_dir, "tfidf.pkl")
+    elif model_type == "lr":
+        model_path = os.path.join(base_path, "lr.pkl")
+        vec_path = os.path.join(base_path, "tfidf_lr.pkl")
 
     elif model_type == "rf":
-        model_path = os.path.join(model_dir, "rf.pkl")
-        vectorizer_path = os.path.join(model_dir, "tfidf_rf.pkl")
+        model_path = os.path.join(base_path, "rf.pkl")
+        vec_path = os.path.join(base_path, "tfidf_rf.pkl")
 
     else:
         return None, None
@@ -25,47 +24,40 @@ def load_model_and_vectorizer(role, model_type):
     with open(model_path, "rb") as f:
         model = pickle.load(f)
 
-    with open(vectorizer_path, "rb") as f:
+    with open(vec_path, "rb") as f:
         vectorizer = pickle.load(f)
 
     return model, vectorizer
 
 
-def rank_resumes_ml(file_paths, jd_text, role, model_type="lr", top_n=5):
+def rank_resumes_ml(role, model_type, resumes_folder, top_n=5):
 
     model, vectorizer = load_model_and_vectorizer(role, model_type)
 
-    if model is None or vectorizer is None:
+    if model is None:
         return []
 
     results = []
 
-    # Transform JD once
-    jd_vector = vectorizer.transform([jd_text])
+    for file in os.listdir(resumes_folder):
+        path = os.path.join(resumes_folder, file)
 
-    for path in file_paths:
         try:
             text = extract_text(path)
+            X = vectorizer.transform([text])
 
-            if not text:
-                continue
+            # Probability score (important)
+            prob = model.predict_proba(X)[0]
 
-            resume_vector = vectorizer.transform([text])
+            # Take probability of "relevant" class (1)
+            score = prob[1] if len(prob) > 1 else prob[0]
 
-            # Combine JD + resume (simple trick)
-            combined = jd_vector + resume_vector
-
-            # Get probability
-            prob = model.predict_proba(combined)[0][1]
-
-            filename = os.path.basename(path)
-
-            results.append((filename, prob))
+            results.append((file, score))
 
         except Exception as e:
-            print(f"Error processing {path}: {e}")
+            print(f"Error processing {file}: {e}")
 
-    # Sort by score
+    # Sort descending
     results.sort(key=lambda x: x[1], reverse=True)
 
     return results[:top_n]
