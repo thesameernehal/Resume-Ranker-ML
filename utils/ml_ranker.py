@@ -30,8 +30,10 @@ def load_model_and_vectorizer(role, model_type):
     return model, vectorizer
 
 
-# For dataset resumes
-def rank_resumes_ml(role, model_type, resumes_folder, top_n=5):
+# DATASET ML RANKING (FIXED)
+def rank_dataset_resumes_ml(role, jd_text, model_type, top_n=5):
+
+    resumes_folder = os.path.join("roles", role, "resumes")
 
     model, vectorizer = load_model_and_vectorizer(role, model_type)
 
@@ -45,10 +47,17 @@ def rank_resumes_ml(role, model_type, resumes_folder, top_n=5):
 
         try:
             text = extract_text(path)
-            X = vectorizer.transform([text])
+
+            if not text.strip():
+                continue
+
+            # 🔥 Combine JD + Resume (important fix)
+            combined_text = jd_text + " " + text
+
+            X = vectorizer.transform([combined_text])
 
             prob = model.predict_proba(X)[0]
-            score = prob[1] if len(prob) > 1 else prob[0]
+            score = max(prob)
 
             results.append((file, score))
 
@@ -59,28 +68,34 @@ def rank_resumes_ml(role, model_type, resumes_folder, top_n=5):
     return results[:top_n]
 
 
-# For uploaded resumes
+# UPLOADED ML RANKING (KEEP SAME BUT CLEANED)
 def rank_uploaded_resumes_ml(file_paths, jd_text, role, model_type, top_n=5):
 
-    from utils.parser import extract_text
-    import numpy as np
-
     model, vectorizer = load_model_and_vectorizer(role, model_type)
+
+    if model is None:
+        return []
 
     results = []
 
     for path in file_paths:
-        text = extract_text(path)
+        try:
+            text = extract_text(path)
 
-        if not text.strip():
-            continue
+            if not text.strip():
+                continue
 
-        X = vectorizer.transform([text])
-        prob = model.predict_proba(X)[0].max()
+            combined_text = jd_text + " " + text
 
-        filename = path.split("\\")[-1]
-        results.append((filename, prob))
+            X = vectorizer.transform([combined_text])
+            prob = model.predict_proba(X)[0]
+            score = max(prob)
 
-    results = sorted(results, key=lambda x: x[1], reverse=True)
+            filename = os.path.basename(path)
+            results.append((filename, score))
 
+        except Exception as e:
+            print(f"Error processing {path}: {e}")
+
+    results.sort(key=lambda x: x[1], reverse=True)
     return results[:top_n]

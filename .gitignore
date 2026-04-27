@@ -24,3 +24,6 @@ roles/*/resumes/*
 
 # Data files for manual uploads
 data/
+
+# random job descriptions for testing
+job_desc.txt

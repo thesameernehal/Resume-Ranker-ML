@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, send_file
 from utils.ranker import rank_resumes
 from utils.compare_models import get_full_comparison
 from utils.rank_uploaded import rank_uploaded_resumes
-from utils.ml_ranker import rank_resumes_ml, rank_uploaded_resumes_ml
+from utils.ml_ranker import rank_dataset_resumes_ml, rank_uploaded_resumes_ml
 
 import os
 import shutil
@@ -41,7 +41,7 @@ def home():
 
         if jd_text:
 
-            # ================= UPLOADED =================
+            # UPLOADED
             if len(uploaded_files) > 0:
                 source_type = "upload"
 
@@ -67,7 +67,7 @@ def home():
                         saved_paths, jd_text, selected_role, model_type, top_n
                     )
 
-            # ================= DATASET =================
+            # DATASET
             elif selected_role:
                 source_type = "dataset"
 
@@ -76,9 +76,9 @@ def home():
                     results = [(item["resume"], item["score"]) for item in raw_results]
 
                 else:
-                    results = rank_resumes_ml(
-                        jd_text, selected_role, model_type, top_n
-                    )
+                   results = rank_dataset_resumes_ml(
+                   selected_role, jd_text, model_type, top_n
+)
 
     return render_template(
         "index.html",
@@ -90,7 +90,7 @@ def home():
     )
 
 
-# ================= VIEW =================
+# VIEW
 @app.route("/view/<filename>")
 def view_file(filename):
 
@@ -110,7 +110,7 @@ def view_file(filename):
     return send_file(path)
 
 
-# ================= REPORT =================
+# REPORT
 @app.route("/report")
 def report():
     data = get_full_comparison()
